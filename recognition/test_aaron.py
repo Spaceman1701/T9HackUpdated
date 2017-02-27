@@ -1,7 +1,7 @@
 import random
 
 from loader.data_loader import load_data_wrapper
-from neuron.network_large import Network
+from neural_network.network_large import Network
 
 
 def get_value(output):
