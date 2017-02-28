@@ -134,7 +134,7 @@ class Node:
         if not self.outs:
             self.error = (expected - self.value)
         else:
-            self.error += sum([e.weight * e.target.calc_error(expected) for e in self.outs])
+            self.error += sum([e.weight * e.target.calc_error(expected) * e.target.value for e in self.outs])
             self.bias_error += self.bias * self.cost_derivative(expected)
         self.needs_error = False
         return self.error
@@ -146,8 +146,8 @@ class Node:
         if not self.needs_update:
             return
         for e in self.ins:
-            e.weight += (learning_rate * d_eval_func(self.value) * self.error * e.origin.value)
-        # self.bias += (self.bias_error * d_eval_func(self.value) * learning_rate)
+            e.weight += (learning_rate * d_eval_func(self.value) * self.error)
+        #self.bias += (self.bias_error * d_eval_func(self.value) * learning_rate)
         for out in self.outs:
             out.target.update_weights(learning_rate, sample_size)
         self.needs_update = False
