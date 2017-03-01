@@ -1,3 +1,6 @@
+import random
+
+
 class Matrix:
     def __init__(self, rows, cols):
         self.num_rows = rows
@@ -5,18 +8,20 @@ class Matrix:
         self.mat = [([0] * self.num_cols) for row_num in range(self.num_rows)]
         self.set_identity()
 
-    def set_zero(self):
+    def set_each_entry(self, operator):
         for row in range(self.num_rows):
             for col in range(self.num_cols):
-                self.mat[row][col] = 0
-        return self
+                self.mat[row][col] = operator(row, col)
+
+    def set_zero(self):
+        self.set_each_entry(lambda row, col: 0)
 
     def set_identity(self):
-        self.set_zero()
-        for row in range(self.num_rows):
-            for col in range(self.num_cols):
-                if row == col:
-                    self.mat[row][col] = 1
+        self.set_each_entry(lambda row, col: 1 if row == col else 0)
+        return self
+
+    def set_randomize(self):
+        self.set_each_entry(lambda row, col: random.uniform(0.0, 1.0))
         return self
 
     def all(self):
@@ -44,11 +49,11 @@ class Matrix:
     def dimension(self):
         return self.num_rows, self.num_cols
 
-    """inner product, or matrix mul, depending of dimension"""
+    """inner product, or matrix mul, depending of dimension. Expects a matrix"""
     def __mul__(self, other):
-        if type(other) != Matrix:
+        if not isinstance(other, Matrix):
             raise TypeError()
-        if self.num_rows != other.num_cols:
+        if self.row_size() != other.col_size():
             raise ValueError("dim incorrect: rows={0}, cols={1}".format(self.num_rows, other.num_cols))
         result = Matrix(self.num_rows, other.num_cols)
         for row_index, row in enumerate(self.rows()):
@@ -77,12 +82,15 @@ class Matrix:
         return result
 
     def transpose(self):
-        if self.num_rows != self.num_cols:
-            raise ValueError("not square matrix")
-        result = Matrix(self.num_rows, self.num_cols)
-        for row in self.rows():
-            for col in self.columns():
-                result[col][row] = self.mat[row][col]
+        result = Matrix(self.num_cols, self.num_rows)
+        for row in range(self.num_rows):
+            for col in range(self.num_cols):
+                result[col, row] = self[row, col]
+        return result
+
+    def set_transpose(self):
+        self.mat = self.transpose().mat
+        return self
 
     def __getitem__(self, item):
         return self.mat[item[0]][item[1]]
@@ -94,4 +102,26 @@ class Matrix:
         output = ""
         for row in self.rows():
             output += str(row) + '\n'
-        return output
+        return output[:-1]  # I'm lazy, sue me
+
+
+class Vector(Matrix):
+    def __init__(self, length):
+        self.length = length
+        super().__init__(length, 1)
+
+    def __mul__(self, other):
+        if type(other) != Vector:
+            return super().__mul__(other)
+        if len(other) != len(self):
+            raise ValueError("length mismatch")
+        return super().__mul__(other.transpose())[0, 0]
+
+    def __len__(self):
+        return self.length
+
+
+m = Vector(3)
+v = Vector(3)
+
+print(m * v)
