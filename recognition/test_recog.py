@@ -13,7 +13,7 @@ def check_number(output, expected):
             e_value = index
     return o_value == e_value
 
-n = Network([784, 10, 10])
+n = Network([784, 10])
 
 
 mnist_data = load_data_wrapper()
