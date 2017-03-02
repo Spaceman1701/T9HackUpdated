@@ -11,11 +11,18 @@ class Matrix:
         self.set_identity()
 
     @classmethod
-    def from_matrix(cls, other):
+    def copy_matrix(cls, other):
         return other.copy()
 
+    @staticmethod
+    def from_list(l):
+        m = Matrix(len(l), 1)
+        for row in range(m.num_rows):
+            m.mat[row][0] = l[row]
+        return m
+
     def copy(self):
-        new_mat = Matrix(0, 0)
+        new_mat = type(self)(0, 0)
         new_mat.num_rows = self.num_rows
         new_mat.num_cols = self.num_cols
         new_mat.mat = copy.deepcopy(self.mat)
@@ -85,14 +92,20 @@ class Matrix:
         return self.entrywise_operation(other, lambda a, b: a - b)
 
     def __rsub__(self, other):
-        raise NotImplemented()
+        if not isinstance(other, Matrix):
+            copy_mat = self.copy()
+            copy_mat.set_each_entry(lambda value, row, col: other - value)
+            return copy_mat
+        return self.entrywise_operation(other, lambda a, b: a - b)
 
     def __add__(self, other):
         if not isinstance(other, Matrix):
             copy_mat = self.copy()
             copy_mat.set_each_entry(lambda value, row, col: value + other)
             return copy_mat
-        return self.entrywise_operation(other, lambda a, b: a + b)
+        in_type = type(other)
+        result = self.entrywise_operation(other, lambda a, b: a + b)
+        return result
 
     def __radd__(self, other):
         copy_mat = self.copy()
@@ -151,38 +164,6 @@ class Matrix:
         for row in self.rows():
             output += str(row) + '\n'
         return output[:-1]  # I'm lazy, sue me
-
-
-class Vector(Matrix):
-    def __init__(self, length):
-        self.length = length
-        super().__init__(length, 1)
-
-    @staticmethod
-    def from_list(l):
-        v = Vector(len(l))
-        for index, value in enumerate(l):
-            v[index] = value
-        return v
-
-    def __mul__(self, other):
-        if type(other) != Vector:
-            return super().__mul__(other)
-        if len(other) != len(self):
-            raise ValueError("length mismatch")
-        return super().__mul__(other.transpose())[0, 0]
-
-    def __len__(self):
-        return self.length
-
-    def __getitem__(self, item):
-        return super().__getitem__((item, 0))
-
-    def __setitem__(self, key, value):
-        super().__setitem__((key, 0), value)
-
-    def as_list(self):
-        return self.transpose()
 
 
 def exp(m):
