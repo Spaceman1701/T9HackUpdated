@@ -1,4 +1,6 @@
 import random
+import math
+import copy
 
 
 class Matrix:
@@ -8,20 +10,27 @@ class Matrix:
         self.mat = [([0] * self.num_cols) for row_num in range(self.num_rows)]
         self.set_identity()
 
+    def copy(self):
+        new_mat = Matrix(0, 0)
+        new_mat.num_rows = self.num_rows
+        new_mat.num_cols = self.num_cols
+        new_mat.mat = copy.deepcopy(self.mat)
+        return new_mat
+
     def set_each_entry(self, operator):
         for row in range(self.num_rows):
             for col in range(self.num_cols):
-                self.mat[row][col] = operator(row, col)
+                self.mat[row][col] = operator(self.mat[row][col], row, col)
 
     def set_zero(self):
-        self.set_each_entry(lambda row, col: 0)
+        self.set_each_entry(lambda value, row, col: 0)
 
     def set_identity(self):
-        self.set_each_entry(lambda row, col: 1 if row == col else 0)
+        self.set_each_entry(lambda value, row, col: 1 if row == col else 0)
         return self
 
     def set_randomize(self):
-        self.set_each_entry(lambda row, col: random.uniform(0.0, 1.0))
+        self.set_each_entry(lambda value, row, col: random.uniform(0.0, 1.0))
         return self
 
     def all(self):
@@ -65,10 +74,45 @@ class Matrix:
         return self.entrywise_operation(other, lambda a, b: a * b)
 
     def __sub__(self, other):
+        if not isinstance(other, Matrix):
+            copy_mat = self.copy()
+            copy_mat.set_each_entry(lambda value, row, col: value - other)
+            return copy_mat
         return self.entrywise_operation(other, lambda a, b: a - b)
 
+    def __rsub__(self, other):
+        raise NotImplemented()
+
     def __add__(self, other):
+        if not isinstance(other, Matrix):
+            copy_mat = self.copy()
+            copy_mat.set_each_entry(lambda value, row, col: value + other)
+            return copy_mat
         return self.entrywise_operation(other, lambda a, b: a + b)
+
+    def __radd__(self, other):
+        copy_mat = self.copy()
+        copy_mat.set_each_entry(lambda value, row, col: value + other)
+        return copy_mat
+
+    def __truediv__(self, other):
+        if isinstance(other, Matrix):
+            raise NotImplemented()
+        copy_mat = self.copy()
+        copy_mat.set_each_entry(lambda value, row, col: value / other)
+        return copy_mat
+
+    def __rtruediv__(self, other):
+        if isinstance(other, Matrix):
+            raise NotImplemented()
+        copy_mat = self.copy()
+        copy_mat.set_each_entry(lambda value, row, col: other / value)
+        return copy_mat
+
+    def __neg__(self):
+        copy_mat = self.copy()
+        copy_mat.set_each_entry(lambda value, row, col: -value)
+        return copy_mat
 
     def entrywise_operation(self, other, operation):
         if type(other) != Matrix:
@@ -120,8 +164,17 @@ class Vector(Matrix):
     def __len__(self):
         return self.length
 
+    def __getitem__(self, item):
+        return super().__getitem__((item, 0))
 
-m = Vector(3)
-v = Vector(3)
+    def __setitem__(self, key, value):
+        super().__setitem__((key, 0), value)
 
-print(m * v)
+    def as_list(self):
+        return self.transpose()
+
+
+def exp(m):
+    result = m.copy()
+    result.set_each_entry(lambda value, row, col: math.exp(value))
+    return result
