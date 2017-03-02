@@ -43,20 +43,11 @@ class Network:
         weights_offset[-1] = error * activation_transfers[-2].transpose()
         biases_offset[-1] = error
 
-        """for layer in range(self.num_layers - 2, 1, -1):
+        for layer in range(self.num_layers - 2, 1, -1):
             d_activation = d_activations[layer]
             error = (self.weights[layer + 1].transpose() * error).entrywise_product(d_activation)
             weights_offset[layer] = error * activation_transfers[layer - 1].transpose()
-            biases_offset[layer] = error"""
-        for layer in range(2, self.num_layers):
-            d_activation = d_activations[-layer]
-            try:
-                error = (self.weights[-layer + 1].transpose() * error).entrywise_product(d_activation)
-            except IndexError:
-                print(layer, len(self.weights))
-                raise IndexError
-            biases_offset[-layer] = error
-            weights_offset[-layer] = error * activation_transfers[layer - 1].transpose()
+            biases_offset[layer] = error
         return weights_offset, biases_offset
 
     def train(self, data, learning_rate, epochs, sample_size):
@@ -64,7 +55,7 @@ class Network:
             raise ValueError("sample size must be positive")
         for e in range(epochs):
             random.shuffle(data)
-            samples = [data[i:i + sample_size] for i in range(epochs - sample_size)]
+            samples = [data[i:i + sample_size] for i in range(0, len(data), sample_size)]
             for sample in samples:
                 weight_delta = []
                 bias_delta = []

@@ -138,7 +138,7 @@ class Matrix:
         if not isinstance(other, Matrix):
             raise TypeError(type(other))
         if self.dimension() != other.dimension():
-            raise ValueError("dim mismatch")
+            raise ValueError("dim mismatch {0}. {1}".format(self.dimension(), other.dimension()))
         result = Matrix(self.num_rows, self.num_cols)
         for row in range(self.num_rows):
             for col in range(self.num_cols):
