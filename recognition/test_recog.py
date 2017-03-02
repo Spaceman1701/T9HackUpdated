@@ -32,14 +32,8 @@ for inputs, results in training_data:
     assert len(fixed_results) == 10
     data_list.append((inputs, fixed_results))
 
-suc = 0
-for d in data_list[:2000]:
-    if check_number(n.feed_forward(d[0]).as_vertical_list()[0], d[1]):
-        suc += 1
 
-print(suc / 2000)
-
-n.train(data_list[:20000], 3, 30, 15, max_samples=10, test_data=data_list[20000:21000])
+n.train(data_list[:20000], 3, 30, 15, max_samples=20, test_data=data_list[20000:21000])
 print("finished training")
 
 suc = 0
