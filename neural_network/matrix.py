@@ -10,6 +10,10 @@ class Matrix:
         self.mat = [([0] * self.num_cols) for row_num in range(self.num_rows)]
         self.set_identity()
 
+    @classmethod
+    def from_matrix(cls, other):
+        return other.copy()
+
     def copy(self):
         new_mat = Matrix(0, 0)
         new_mat.num_rows = self.num_rows
@@ -115,8 +119,8 @@ class Matrix:
         return copy_mat
 
     def entrywise_operation(self, other, operation):
-        if type(other) != Matrix:
-            raise TypeError()
+        if not isinstance(other, Matrix):
+            raise TypeError(type(other))
         if self.dimension() != other.dimension():
             raise ValueError("dim mismatch")
         result = Matrix(self.num_rows, self.num_cols)
@@ -153,6 +157,13 @@ class Vector(Matrix):
     def __init__(self, length):
         self.length = length
         super().__init__(length, 1)
+
+    @staticmethod
+    def from_list(l):
+        v = Vector(len(l))
+        for index, value in enumerate(l):
+            v[index] = value
+        return v
 
     def __mul__(self, other):
         if type(other) != Vector:
