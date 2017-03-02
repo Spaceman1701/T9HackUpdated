@@ -43,16 +43,20 @@ class Network:
         weights_offset[-1] = error * activation_transfers[-2].transpose()
         biases_offset[-1] = error
 
-        for layer in range(self.num_layers - 2, 1, -1):
+        """for layer in range(self.num_layers - 2, 1, -1):
             d_activation = d_activations[layer]
             error = (self.weights[layer + 1].transpose() * error).entrywise_product(d_activation)
             weights_offset[layer] = error * activation_transfers[layer - 1].transpose()
-            biases_offset[layer] = error
-        """for layer in range(2, self.num_layers):
+            biases_offset[layer] = error"""
+        for layer in range(2, self.num_layers):
             d_activation = d_activations[-layer]
-            error = (self.weights[-layer - 1].transpose() * error).entrywise_product(d_activation)
+            try:
+                error = (self.weights[-layer + 1].transpose() * error).entrywise_product(d_activation)
+            except IndexError:
+                print(layer, len(self.weights))
+                raise IndexError
             biases_offset[-layer] = error
-            weights_offset[-layer] = error * activation_transfers[layer - 1].transpose()"""
+            weights_offset[-layer] = error * activation_transfers[layer - 1].transpose()
         return weights_offset, biases_offset
 
     def train(self, data, learning_rate, epochs, sample_size):
@@ -71,7 +75,6 @@ class Network:
                         new_w_offset, new_b_offset = self.backpropagate(data_item[0], data_item[1])
                         weight_delta = [w + n for w, n in zip(weight_delta, new_w_offset)]
                         bias_delta = [b + n for b, n in zip(bias_delta, new_b_offset)]
-                print(weight_delta[0])
                 self.weights = [weight - (delta * learning_rate / sample_size)
                                for weight, delta in zip(self.weights, weight_delta)]
                 self.biases = [bias - (delta * learning_rate / sample_size)
