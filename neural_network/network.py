@@ -7,10 +7,10 @@ class Network:
     def __init__(self, sizes):
         self.sizes = sizes
         self.num_layers = len(sizes)
-        self.weights = [Matrix(next_layer, current_layer).set_zero()
+        self.weights = [Matrix(next_layer, current_layer).set_randomize()
                         for next_layer, current_layer in zip(sizes[1:], sizes[:-1])]
         #  weights[layer][origin][target]
-        self.biases = [Matrix(size, 1).set_zero() for size in sizes[1:]]
+        self.biases = [Matrix(size, 1).set_randomize() for size in sizes[1:]]
         #  biases[layer][node]
 
     def calc_activation(self, layer, inputs):
@@ -50,7 +50,7 @@ class Network:
             biases_offset[layer] = error
         return weights_offset, biases_offset
 
-    def train(self, data, learning_rate, epochs, sample_size, max_samples=None):
+    def train(self, data, learning_rate, epochs, sample_size, max_samples=None, test_data=None):
         if sample_size < 1:
             raise ValueError("sample size must be positive")
         for e in range(epochs):
@@ -72,7 +72,17 @@ class Network:
                                for weight, delta in zip(self.weights, weight_delta)]
                 self.biases = [bias - (delta * learning_rate / sample_size)
                                for bias, delta in zip(self.biases, bias_delta)]
-            print("Epoch {0} complete.".format(e))
+            if test_data:
+                res = 0
+                for test_in, out, in test_data:
+                    result = self.feed_forward(test_in).as_vertical_list()[0]
+                    res_max = max(zip(result, range(len(result))))[1]
+                    test_max = max(zip(out, range(len(out))))[1]
+                    if res_max == test_max:
+                        res += 1
+                print("Eppch {0} complete. Correct: {1}".format(e, res / len(test_data)))
+            else:
+                print("Epoch {0} complete.".format(e))
 
 
 def calc_error(activation, expected):
