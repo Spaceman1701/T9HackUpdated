@@ -23,7 +23,7 @@ class Network:
             inputs_mat = calc_sigmoid(self.calc_activation(layer, inputs_mat))
         return inputs_mat
 
-    def backpropigate(self, inputs, outputs):
+    def backpropagate(self, inputs, outputs):
         weights_offset = [Matrix(next_layer, current_layer).set_zero()
                         for next_layer, current_layer in zip(self.sizes[1:], self.sizes[:-1])]
         biases_offset = [Matrix(size, 1).set_zero() for size in self.sizes[1:]]
@@ -65,7 +65,6 @@ class Network:
                                for weight, delta in zip(self.weights, weight_delta)]
                 self.biases = [bias - (delta * learning_rate / sample_size)
                                for bias, delta in zip(self.biases, bias_delta)]
-
 
 
 def calc_error(activation, expected):
