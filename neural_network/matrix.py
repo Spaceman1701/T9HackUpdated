@@ -35,6 +35,7 @@ class Matrix:
 
     def set_zero(self):
         self.set_each_entry(lambda value, row, col: 0)
+        return self
 
     def set_identity(self):
         self.set_each_entry(lambda value, row, col: 1 if row == col else 0)
@@ -72,9 +73,11 @@ class Matrix:
     """inner product, or matrix mul, depending of dimension. Expects a matrix"""
     def __mul__(self, other):
         if not isinstance(other, Matrix):
-            raise TypeError()
-        if self.row_size() != other.col_size():
-            raise ValueError("dim incorrect: rows={0}, cols={1}".format(self.num_rows, other.num_cols))
+            copy_mat = self.copy()
+            copy_mat.set_each_entry(lambda value, row, col: value * other)
+            return copy_mat
+        if self.num_cols != other.num_rows:
+            raise ValueError("dim incorrect: rows={0}, cols={1}".format(self.num_cols, other.num_rows))
         result = Matrix(self.num_rows, other.num_cols)
         for row_index, row in enumerate(self.rows()):
             for col_index, col in enumerate(other.columns()):

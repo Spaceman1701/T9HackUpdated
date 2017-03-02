@@ -1,6 +1,6 @@
 from neural_network.matrix import Matrix
 import neural_network.matrix as matrix
-import math
+import random
 
 
 class Network:
@@ -31,45 +31,62 @@ class Network:
         inputs_mat = Matrix.from_list(inputs)
         outputs_mat = Matrix.from_list(outputs)
 
-        activations = [inputs_mat]
-        activations_sigmoid = [calc_sigmoid(inputs_mat)]
-        d_activation = [calc_d_sigmoid(inputs_mat)]
+        activation_transfers = [inputs_mat]
+        d_activations = [calc_d_sigmoid(inputs_mat)]
 
-        for layer in range(1, self.num_layers):
-            activations.append(self.calc_activation(layer, activations_sigmoid[-1]))
-            activations_sigmoid.append(calc_sigmoid(activations[-1]))
-            d_activation.append(calc_d_sigmoid(activations_sigmoid[-1]))
+        for layer in range(self.num_layers - 1):
+            activation = self.calc_activation(layer, activation_transfers[-1])
+            activation_transfers.append(calc_sigmoid(activation))
+            d_activations.append(calc_d_sigmoid(activation_transfers[-1]))  # pycharm complains about this, but it's not wrong
 
-        error = calc_error(activations_sigmoid[-1], outputs_mat).entrywise_product(d_activation[-1])
-        print(type(error))
-        print(type(d_activation[-2]))
-        weights_offset[-1] = error.transpose() * d_activation[-2]
+        error = calc_error(activation_transfers[-1], outputs_mat).entrywise_product(d_activations[-1])
+        weights_offset[-1] = error * d_activations[-2].transpose()
         biases_offset[-1] = error
 
+        for layer in range(self.num_layers - 2, 1, -1):
+            d_activation = d_activations[layer]
+            error = (self.weights[layer + 1].transpose() * error).entrywise_product(d_activation)
+            w_off = error * d_activations[layer - 1].transpose()
+            weights_offset[layer] = w_off
+            biases_offset[layer] = error
+        return weights_offset, biases_offset
+
+    def train(self, data, learning_rate, epochs, sample_size):
+        if sample_size < 1:
+            raise ValueError("sample size must be positive")
+        for e in range(epochs):
+            random.shuffle(data)
+            samples = [data[i:i + sample_size] for i in range(epochs - sample_size)]
+            for sample in samples:
+                for data_item in sample:
+                    weight_delta, bias_delta = self.backpropigate(data_item[0], data_item[1])
+
+                self.weights = [weight - (delta * learning_rate / sample_size)
+                               for weight, delta in zip(self.weights, weight_delta)]
+                self.biases = [bias - (delta * learning_rate / sample_size)
+                               for bias, delta in zip(self.biases, bias_delta)]
 
 
 
 def calc_error(activation, expected):
-    return activation - expected
+    result = activation - expected
+    assert type(result) == Matrix
+    return result
 
 
 def calc_sigmoid(activation):
     assert type(activation) == Matrix
-    return 1.0 / (1.0 + matrix.exp(-activation))
+    result = 1.0 / (1.0 + matrix.exp(-activation))
+    assert type(result) == Matrix
+    return result
 
 
 def calc_d_sigmoid(value):
-    onem = 1.0 - value
-    return value.entrywise_product(onem)
+    assert type(value) == Matrix
+    result = value.entrywise_product(1.0 - value)
+    assert type(result) == Matrix
+    return result
 
-
-n = Network([4, 3, 2])
-
-#print(n.feed_forward([1, 1, 1, 1]))
-
-print()
-
-n.backpropigate([1, 1, 1, 1], [0, 0])
 
 
 
