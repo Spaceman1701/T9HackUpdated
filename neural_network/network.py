@@ -2,6 +2,7 @@ from neural_network.matrix import Matrix, Vector
 import neural_network.matrix as matrix
 import math
 
+
 class Network:
     def __init__(self, sizes):
         self.sizes = sizes
@@ -28,6 +29,7 @@ def calc_error(activation, expected):
 
 def calc_sigmoid(activation):
     return 1.0 / (1.0 + matrix.exp(-activation))
+
 
 def calc_d_sigmoid(value):
     return value * (1.0 - value)
