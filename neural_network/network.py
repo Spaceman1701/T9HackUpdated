@@ -50,13 +50,15 @@ class Network:
             biases_offset[layer] = error
         return weights_offset, biases_offset
 
-    def train(self, data, learning_rate, epochs, sample_size):
+    def train(self, data, learning_rate, epochs, sample_size, max_samples=None):
         if sample_size < 1:
             raise ValueError("sample size must be positive")
         for e in range(epochs):
             random.shuffle(data)
             samples = [data[i:i + sample_size] for i in range(0, len(data), sample_size)]
-            for sample in samples:
+            for s_number, sample in enumerate(samples):
+                if max_samples and s_number > max_samples:
+                    break
                 weight_delta = []
                 bias_delta = []
                 for data_item in sample:
@@ -86,10 +88,10 @@ def calc_d_sigmoid(value):
 
 
 if __name__ == '__main__':
-    test_inputs = [[0, 1]] * 50000
-    test_outputs = [[1, 0]] * 50000
+    test_inputs = [[0, 1]] * 5000
+    test_outputs = [[1, 0]] * 5000
 
-    for i in range(50000):
+    for i in range(5000):
         test_inputs.append([1, 0])
         test_outputs.append([0, 1])
 
