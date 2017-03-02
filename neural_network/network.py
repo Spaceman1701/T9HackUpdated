@@ -40,15 +40,19 @@ class Network:
             d_activations.append(calc_d_sigmoid(activation_transfers[-1]))  # pycharm complains about this, but it's not wrong
 
         error = calc_error(activation_transfers[-1], outputs_mat).entrywise_product(d_activations[-1])
-        weights_offset[-1] = error * d_activations[-2].transpose()
+        weights_offset[-1] = error * activation_transfers[-2].transpose()
         biases_offset[-1] = error
 
         for layer in range(self.num_layers - 2, 1, -1):
             d_activation = d_activations[layer]
             error = (self.weights[layer + 1].transpose() * error).entrywise_product(d_activation)
-            w_off = error * d_activations[layer - 1].transpose()
-            weights_offset[layer] = w_off
+            weights_offset[layer] = error * activation_transfers[layer - 1].transpose()
             biases_offset[layer] = error
+        """for layer in range(2, self.num_layers):
+            d_activation = d_activations[-layer]
+            error = (self.weights[-layer - 1].transpose() * error).entrywise_product(d_activation)
+            biases_offset[-layer] = error
+            weights_offset[-layer] = error * activation_transfers[layer - 1].transpose()"""
         return weights_offset, biases_offset
 
     def train(self, data, learning_rate, epochs, sample_size):
@@ -88,12 +92,16 @@ def calc_d_sigmoid(value):
 
 
 if __name__ == '__main__':
-    test_inputs = [[1], [0]] * 50000
-    test_outputs = [[0], [1]] * 50000
+    test_inputs = [[1]] * 50000
+    test_outputs = [[0]] * 50000
+
+    for i in range(50000):
+        test_inputs.append([0])
+        test_outputs.append([1])
 
     test_data = [(x, y) for x, y in zip(test_inputs, test_outputs)]
 
-    n = Network([1, 1, 1])
+    n = Network([1, 2, 1])
 
     n.train(test_data, 0.9, 60, 20)
 
