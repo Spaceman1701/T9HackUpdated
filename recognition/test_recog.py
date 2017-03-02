@@ -13,7 +13,7 @@ def check_number(output, expected):
             e_value = index
     return o_value == e_value
 
-n = Network([784, 30, 10])
+n = Network([784, 10, 10])
 
 
 mnist_data = load_data_wrapper()
@@ -33,7 +33,7 @@ for inputs, results in training_data:
     data_list.append((inputs, fixed_results))
 
 
-n.train(data_list[:20000], 3, 30, 15, max_samples=20, test_data=data_list[20000:21000])
+n.train(data_list[:20000], 0.3, 30, 15, max_samples=20, test_data=data_list[20000:21000])
 print("finished training")
 
 suc = 0

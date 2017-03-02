@@ -7,10 +7,10 @@ class Network:
     def __init__(self, sizes):
         self.sizes = sizes
         self.num_layers = len(sizes)
-        self.weights = [Matrix(next_layer, current_layer).set_randomize()
+        self.weights = [Matrix(next_layer, current_layer).set_zero()
                         for next_layer, current_layer in zip(sizes[1:], sizes[:-1])]
         #  weights[layer][origin][target]
-        self.biases = [Matrix(size, 1).set_randomize() for size in sizes[1:]]
+        self.biases = [Matrix(size, 1).set_zero() for size in sizes[1:]]
         #  biases[layer][node]
 
     def calc_activation(self, layer, inputs):
