@@ -38,7 +38,7 @@ for d in data_list[:2000]:
 
 print(suc / 2000)
 
-n.train(data_list[:10000], 0.9, 30, 10)
+n.train(data_list, 3, 30, 10)
 print("finished training")
 
 suc = 0

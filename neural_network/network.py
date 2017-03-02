@@ -71,7 +71,7 @@ class Network:
                         new_w_offset, new_b_offset = self.backpropagate(data_item[0], data_item[1])
                         weight_delta = [w + n for w, n in zip(weight_delta, new_w_offset)]
                         bias_delta = [b + n for b, n in zip(bias_delta, new_b_offset)]
-
+                print(weight_delta[0])
                 self.weights = [weight - (delta * learning_rate / sample_size)
                                for weight, delta in zip(self.weights, weight_delta)]
                 self.biases = [bias - (delta * learning_rate / sample_size)
@@ -92,22 +92,22 @@ def calc_d_sigmoid(value):
 
 
 if __name__ == '__main__':
-    test_inputs = [[1]] * 50000
-    test_outputs = [[0]] * 50000
+    test_inputs = [[0, 1]] * 50000
+    test_outputs = [[1, 0]] * 50000
 
     for i in range(50000):
-        test_inputs.append([0])
-        test_outputs.append([1])
+        test_inputs.append([1, 0])
+        test_outputs.append([0, 1])
 
     test_data = [(x, y) for x, y in zip(test_inputs, test_outputs)]
 
-    n = Network([1, 2, 1])
+    n = Network([2, 2])
 
-    n.train(test_data, 0.9, 60, 20)
+    n.train(test_data, 8.9, 60, 20)
 
-    print(n.feed_forward([1]))
+    print(n.feed_forward([0, 1]))
     print()
-    print(n.feed_forward([0]))
+    print(n.feed_forward([1, 0]))
 
 
 
