@@ -168,6 +168,12 @@ class Matrix:
             output += str(row) + '\n'
         return output[:-1]  # I'm lazy, sue me
 
+    def as_vertical_list(self):
+        result = []
+        for val in self.columns():
+            result.append(val)
+        return result
+
 
 def exp(m):
     result = m.copy()
